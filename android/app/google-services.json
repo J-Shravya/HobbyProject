@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "774950669075",
+    "project_id": "canteenfoodorderingapp-4b1a5",
+    "firebase_url": "https://canteenfoodorderingapp-4b1a5-default-rtdb.firebaseio.com/",
+    "storage_bucket": "canteenfoodorderingapp-4b1a5.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:774950669075:android:7d4e1abdd741bdba3e28e6",
+        "android_client_info": {
+          "package_name": "com.example.canteen_food_ordering_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "774950669075-7ld671ml7dunqvoam3hq3pln6ufe3jo8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.canteen_food_ordering_app",
+            "certificate_hash": "49dea2512b778bae24f89b7f6c34eea55a7c651d"
+          }
+        },
+        {
+          "client_id": "774950669075-ikg7a0f9q72p8v9mig2akkjbld8nta81.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPUfodJoqOT4KlbLP6UFPKTH6ZgO5UIJI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "774950669075-ikg7a0f9q72p8v9mig2akkjbld8nta81.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
