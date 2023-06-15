@@ -154,52 +154,106 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // Widget myOrders(uid) {
+  //   return StreamBuilder<QuerySnapshot>(
+  //     stream: FirebaseFirestore.instance
+  //         .collection('orders')
+  //         .where('placed_by', isEqualTo: uid)
+  //         .orderBy("is_delivered")
+  //         .orderBy("placed_at", descending: true)
+  //         .snapshots(),
+  //     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+  //       if (snapshot.hasData && snapshot.data.docs.length > 0) {
+  //         List<dynamic> orders = snapshot.data.docs;
+  //         return Container(
+  //           margin: EdgeInsets.only(top: 10.0),
+  //           child: ListView.builder(
+  //               shrinkWrap: true,
+  //               physics: const NeverScrollableScrollPhysics(),
+  //               itemCount: orders.length,
+  //               itemBuilder: (context, int i) {
+  //                 return new GestureDetector(
+  //                   child: Card(
+  //                     child: ListTile(
+  //                         enabled: !orders[i]['is_delivered'],
+  //                         title: Text("Order #${(i + 1)}"),
+  //                         subtitle: Text(
+  //                             'Total Amount: ${orders[i]['total'].toString()} INR'),
+  //                         trailing: Text(
+  //                             'Status: ${(orders[i]['is_delivered']) ? "Delivered" : "Pending"}')),
+  //                   ),
+  //                   onTap: () {
+  //                     Navigator.push(
+  //                         context,
+  //                         MaterialPageRoute(
+  //                             builder: (context) =>
+  //                                 OrderDetailsPage(orders[i])));
+  //                   },
+  //                 );
+  //               }),
+  //         );
+  //       } else {
+  //         return Container(
+  //   alignment: Alignment.center,
+  //   padding: EdgeInsets.symmetric(vertical: 20),
+  //   child: Text("No orders found"),
+  //         );
+  //       }
+  //     },
+  //   );
+  // }
+
   Widget myOrders(uid) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: FirebaseFirestore.instance
-          .collection('orders')
-          .where('placed_by', isEqualTo: uid)
-          .orderBy("is_delivered")
-          .orderBy("placed_at", descending: true)
-          .snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.hasData && snapshot.data.docs.length > 0) {
-          List<dynamic> orders = snapshot.data.docs;
-          return Container(
-            margin: EdgeInsets.only(top: 10.0),
-            child: ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: orders.length,
-                itemBuilder: (context, int i) {
-                  return new GestureDetector(
-                    child: Card(
-                      child: ListTile(
-                          enabled: !orders[i]['is_delivered'],
-                          title: Text("Order #${(i + 1)}"),
-                          subtitle: Text(
-                              'Total Amount: ${orders[i]['total'].toString()} INR'),
-                          trailing: Text(
-                              'Status: ${(orders[i]['is_delivered']) ? "Delivered" : "Pending"}')),
+    return Container(
+      height:
+          200, // Provide a fixed height or adjust it as per your requirement
+      child: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('orders')
+            .where('placed_by', isEqualTo: uid)
+            .orderBy("is_delivered")
+            .orderBy("placed_at", descending: true)
+            .snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasData && snapshot.data.docs.length > 0) {
+            List<dynamic> orders = snapshot.data.docs;
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: orders.length,
+              itemBuilder: (context, int i) {
+                return GestureDetector(
+                  child: Card(
+                    child: ListTile(
+                      enabled: !orders[i]['is_delivered'],
+                      title: Text("Order #${(i + 1)}"),
+                      subtitle: Text(
+                          'Total Amount: ${orders[i]['total'].toString()} INR'),
+                      trailing: Text((orders[i]['is_delivered'])
+                          ? "Delivered"
+                          : "Pending"),
                     ),
-                    onTap: () {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) =>
-                                  OrderDetailsPage(orders[i])));
-                    },
-                  );
-                }),
-          );
-        } else {
-          return Container(
-            padding: EdgeInsets.symmetric(vertical: 20),
-            width: MediaQuery.of(context).size.width * 0.6,
-            child: Text(""),
-          );
-        }
-      },
+                  ),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => OrderDetailsPage(orders[i]),
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          } else {
+            return Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.symmetric(vertical: 20),
+              child: Text("No orders found"),
+            );
+          }
+        },
+      ),
     );
   }
 
@@ -232,8 +286,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   validator: (String value) {
                     if (int.tryParse(value) == null)
                       return "Not a valid integer";
-                    else if (int.parse(value) < 100)
-                      return "Minimum Deposit is 100 INR";
+                    else if (int.parse(value) < 10)
+                      return "Minimum Deposit is 10 INR";
                     else if (int.parse(value) > 1000)
                       return "Maximum Deposit is 1000 INR";
                     else
@@ -281,8 +335,8 @@ class _ProfilePageState extends State<ProfilePage> {
         Provider.of<AuthNotifier>(context, listen: false);
     money = amount;
     var options = {
-      'key': 'rzp_test_D5ZAPbZuM494Pw',
-      'amount': money * 100,
+      'key': 'rzp_test_MWfE74AtEesoMr',
+      'amount': money * 10,
       'name': authNotifier.userDetails.displayName,
       'description': "${authNotifier.userDetails.uuid} - ${DateTime.now()}",
       'prefill': {

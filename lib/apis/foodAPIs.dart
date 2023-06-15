@@ -445,12 +445,129 @@ addMoney(int amount, BuildContext context, String id) async {
   toast("Money added successfully!");
 }
 
+// placeOrder(BuildContext context, double total) async {
+//   pr = new ProgressDialog(context,
+//       type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
+//   pr.show();
+//   try {
+//     // Initiaization
+//     User currentUser = await FirebaseAuth.instance.currentUser;
+//     CollectionReference cartRef =
+//         FirebaseFirestore.instance.collection('carts');
+//     CollectionReference orderRef =
+//         FirebaseFirestore.instance.collection('orders');
+//     CollectionReference itemRef =
+//         FirebaseFirestore.instance.collection('items');
+//     CollectionReference userRef =
+//         FirebaseFirestore.instance.collection('users');
+
+//     List<String> foodIds = new List<String>();
+//     Map<String, int> count = new Map<String, int>();
+//     List<dynamic> _cartItems = new List<dynamic>();
+
+//     // Checking user balance
+//     DocumentSnapshot userData = await userRef.doc(currentUser.uid).get();
+//     if (userData.get('balance') < total) {
+//       pr.hide().then((isHidden) {
+//         print(isHidden);
+//       });
+//       toast("You dont have succifient balance to place this order!");
+//       return;
+//     }
+
+//     // Getting all cart items of the user
+//     QuerySnapshot data =
+//         await cartRef.doc(currentUser.uid).collection('items').get();
+//     data.docs.forEach((item) {
+//       foodIds.add(item.id);
+//       count[item.id] = item.get('count');
+//     });
+
+//     // Checking for item availability
+//     QuerySnapshot snap =
+//         await itemRef.where(FieldPath.documentId, whereIn: foodIds).get();
+//     for (var i = 0; i < snap.docs.length; i++) {
+//       if (snap.docs[i].get('total_qty') < count[snap.docs[i].id]) {
+//         pr.hide().then((isHidden) {
+//           print(isHidden);
+//         });
+//         print("not");
+//         toast(
+//             "Item: ${snap.docs[i].get('item_name')} has QTY: ${snap.docs[i].get('total_qty')} only. Reduce/Remove the item.");
+//         return;
+//       }
+//     }
+
+//     // Creating cart items array
+//     snap.docs.forEach((item) {
+//       _cartItems.add({
+//         "item_id": item.id,
+//         "count": count[item.id],
+//         "item_name": item.get('item_name'),
+//         "price": item.get('price')
+//       });
+//     });
+
+//     // Creating a transaction
+//     await FirebaseFirestore.instance
+//         .runTransaction((Transaction transaction) async {
+//       // Update the item count in items table
+//       for (var i = 0; i < snap.docs.length; i++) {
+//         await transaction.update(snap.docs[i].reference, {
+//           "total_qty": snap.docs[i].get('total_qty') - count[snap.docs[i].id]
+//         });
+//       }
+
+//       // Deduct amount from user
+//       await userRef
+//           .doc(currentUser.uid)
+//           .update({'balance': FieldValue.increment(-1 * total)});
+
+//       // Place a new order through app
+//       await orderRef.doc().set({
+//         "items": _cartItems,
+//         "is_delivered": false,
+//         "total": total,
+//         "placed_at": DateTime.now(),
+//         "placed_by": currentUser.uid
+//       });
+
+//       // Empty cart
+//       for (var i = 0; i < data.docs.length; i++) {
+//         await transaction.delete(data.docs[i].reference);
+//       }
+//       print("in in");
+//       // return;
+//     });
+
+//     // Successfull transaction
+//     pr.hide().then((isHidden) {
+//       print(isHidden);
+//     });
+//     Navigator.pop(context);
+//     Navigator.pushReplacement(
+//       context,
+//       MaterialPageRoute(builder: (BuildContext context) {
+//         return NavigationBarPage(selectedIndex: 1);
+//       }),
+//     );
+//     toast("Order Placed Successfully!");
+//   } catch (error) {
+//     pr.hide().then((isHidden) {
+//       print(isHidden);
+//     });
+//     Navigator.pop(context);
+//     toast("Failed to place order!");
+//     print(error);
+//     return;
+//   }
+// }
 placeOrder(BuildContext context, double total) async {
   pr = new ProgressDialog(context,
       type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
   pr.show();
   try {
-    // Initiaization
+    // Initialization
     User currentUser = await FirebaseAuth.instance.currentUser;
     CollectionReference cartRef =
         FirebaseFirestore.instance.collection('carts');
@@ -461,17 +578,17 @@ placeOrder(BuildContext context, double total) async {
     CollectionReference userRef =
         FirebaseFirestore.instance.collection('users');
 
-    List<String> foodIds = new List<String>();
-    Map<String, int> count = new Map<String, int>();
-    List<dynamic> _cartItems = new List<dynamic>();
+    List<String> foodIds = [];
+    Map<String, int> count = {};
+    List<dynamic> _cartItems = [];
 
     // Checking user balance
     DocumentSnapshot userData = await userRef.doc(currentUser.uid).get();
-    if (userData.get('balance') < total) {
+    if (userData.get('balance') <= total) {
       pr.hide().then((isHidden) {
         print(isHidden);
       });
-      toast("You dont have succifient balance to place this order!");
+      toast("You don't have sufficient balance to place this order!");
       return;
     }
 
@@ -491,7 +608,6 @@ placeOrder(BuildContext context, double total) async {
         pr.hide().then((isHidden) {
           print(isHidden);
         });
-        print("not");
         toast(
             "Item: ${snap.docs[i].get('item_name')} has QTY: ${snap.docs[i].get('total_qty')} only. Reduce/Remove the item.");
         return;
@@ -536,11 +652,9 @@ placeOrder(BuildContext context, double total) async {
       for (var i = 0; i < data.docs.length; i++) {
         await transaction.delete(data.docs[i].reference);
       }
-      print("in in");
-      // return;
     });
 
-    // Successfull transaction
+    // Successful transaction
     pr.hide().then((isHidden) {
       print(isHidden);
     });
@@ -557,35 +671,65 @@ placeOrder(BuildContext context, double total) async {
       print(isHidden);
     });
     Navigator.pop(context);
-    toast("Failed to place order!");
+    toast("Failed to place the order!");
     print(error);
     return;
   }
 }
 
-orderReceived(String id, BuildContext context) async {
-  pr = new ProgressDialog(context,
-      type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
+// orderReceived(String id, BuildContext context) async {
+//   pr = new ProgressDialog(context,
+//       type: ProgressDialogType.Normal, isDismissible: false, showLogs: false);
+//   pr.show();
+//   try {
+//     CollectionReference ordersRef =
+//         FirebaseFirestore.instance.collection('orders');
+//     await ordersRef
+//         .doc(id)
+//         .update({'is_delivered': true})
+//         .catchError((e) => print(e))
+//         .then((value) => print("Success"));
+//   } catch (error) {
+//     pr.hide().then((isHidden) {
+//       print(isHidden);
+//     });
+//     toast("Failed to mark as received!");
+//     print(error);
+//     return;
+//   }
+//   pr.hide().then((isHidden) {
+//     print(isHidden);
+//   });
+//   Navigator.pop(context);
+//   toast("Order received successfully!");
+// }
+Future<void> orderReceived(String id, BuildContext context) async {
+  ProgressDialog pr = new ProgressDialog(
+    context,
+    type: ProgressDialogType.Normal,
+    isDismissible: false,
+    showLogs: false,
+  );
   pr.show();
+
   try {
-    CollectionReference ordersRef =
+    CollectionReference orderRef =
         FirebaseFirestore.instance.collection('orders');
-    await ordersRef
-        .doc(id)
-        .update({'is_delivered': true})
-        .catchError((e) => print(e))
-        .then((value) => print("Success"));
+
+    await orderRef.doc(id).update({'is_delivered': true});
+
+    pr.hide().then((isHidden) {
+      print(isHidden);
+    });
+
+    Navigator.pop(context);
+    toast("Order received successfully!");
   } catch (error) {
     pr.hide().then((isHidden) {
       print(isHidden);
     });
-    toast("Failed to mark as received!");
+
+    toast("Failed to mark the order as received!");
     print(error);
-    return;
   }
-  pr.hide().then((isHidden) {
-    print(isHidden);
-  });
-  Navigator.pop(context);
-  toast("Order received successfully!");
 }

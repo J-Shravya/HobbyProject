@@ -61,7 +61,7 @@ class _CartPageState extends State<CartPage> {
                 Map<String, int> count = new Map<String, int>();
                 snapshot1.data.docs.forEach((item) {
                   foodIds.add(item.id);
-                  //count[item.id] = item.data()['count'];
+                  count[item.id] = item.get('count');
                 });
                 return dataDisplay(
                     context, authNotifier.userDetails.uuid, foodIds, count);
@@ -79,7 +79,7 @@ class _CartPageState extends State<CartPage> {
     );
   }
 
-  Widget dataDisplay(BuildContext context, String uid, List<String> foodIds,
+  /* Widget dataDisplay(BuildContext context, String uid, List<String> foodIds,
       Map<String, int> count) {
     return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
@@ -172,6 +172,132 @@ class _CartPageState extends State<CartPage> {
                     ),
                   ],
                 ));
+          } else {
+            return Container(
+              padding: EdgeInsets.symmetric(vertical: 20),
+              width: MediaQuery.of(context).size.width * 0.6,
+              child: Text("No Items to display"),
+            );
+          }
+        } else {
+          return Container(
+            padding: EdgeInsets.symmetric(vertical: 20),
+            width: MediaQuery.of(context).size.width * 0.6,
+            child: Text("No Items to display"),
+          );
+        }
+      },
+    );
+  }*/
+  Widget dataDisplay(
+    BuildContext context,
+    String uid,
+    List<String> foodIds,
+    Map<String, int> count,
+  ) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('items')
+          .where(FieldPath.documentId, whereIn: foodIds)
+          .snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasData && snapshot.data.docs.length > 0) {
+          List<Cart> _cartItems = [];
+          snapshot.data.docs.forEach((item) {
+            _cartItems.add(Cart(
+              item.id,
+              count[item.id],
+              item.get('item_name'),
+              item.get('total_qty'),
+              item.get('price'),
+            ));
+          });
+          if (_cartItems.length > 0) {
+            double sum = 0;
+            int itemsCount = 0;
+            _cartItems.forEach((element) {
+              if (element.price != null && element.count != null) {
+                sum += element.price * element.count;
+                itemsCount += element.count;
+              }
+            });
+            return Container(
+              margin: EdgeInsets.only(top: 10.0),
+              child: Column(
+                children: [
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _cartItems.length,
+                    itemBuilder: (context, int i) {
+                      return ListTile(
+                        title: Text(_cartItems[i].itemName ?? ''),
+                        subtitle:
+                            Text('cost: ${_cartItems[i].price.toString()}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            (_cartItems[i].count == null ||
+                                    _cartItems[i].count <= 1)
+                                ? IconButton(
+                                    onPressed: () async {
+                                      setState(() {
+                                        foodIds.remove(_cartItems[i].itemId);
+                                      });
+                                      await editCartItem(
+                                        _cartItems[i].itemId,
+                                        0,
+                                        context,
+                                      );
+                                    },
+                                    icon: new Icon(Icons.delete),
+                                  )
+                                : IconButton(
+                                    onPressed: () async {
+                                      await editCartItem(
+                                        _cartItems[i].itemId,
+                                        (_cartItems[i].count - 1),
+                                        context,
+                                      );
+                                    },
+                                    icon: new Icon(Icons.remove),
+                                  ),
+                            Text(
+                              '${_cartItems[i].count ?? 0}',
+                              style: TextStyle(fontSize: 18.0),
+                            ),
+                            IconButton(
+                              icon: new Icon(Icons.add),
+                              onPressed: () async {
+                                await editCartItem(
+                                  _cartItems[i].itemId,
+                                  (_cartItems[i].count + 1),
+                                  context,
+                                );
+                              },
+                            )
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                  Text("Total ($itemsCount items): $sum INR"),
+                  SizedBox(
+                    height: 40,
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      showAlertDialog(
+                          context, "Total ($itemsCount items): $sum INR");
+                    },
+                    child: CustomRaisedButton(buttonText: 'Proceed to buy'),
+                  ),
+                  SizedBox(
+                    height: 70,
+                  ),
+                ],
+              ),
+            );
           } else {
             return Container(
               padding: EdgeInsets.symmetric(vertical: 20),

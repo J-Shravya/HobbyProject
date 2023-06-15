@@ -70,26 +70,36 @@ class _LandingPageState extends State<LandingPage> {
             ),
             GestureDetector(
               onTap: () {
-                (authNotifier.user == null)
-                    ? Navigator.pushReplacement(context,
-                        MaterialPageRoute(builder: (BuildContext context) {
-                        return LoginPage();
-                      }))
-                    : (authNotifier.userDetails == null)
-                        ? print('wait')
-                        : (authNotifier.userDetails.role == 'admin')
-                            ? Navigator.pushReplacement(context,
-                                MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return AdminHomePage();
-                                },
-                              ))
-                            : Navigator.pushReplacement(context,
-                                MaterialPageRoute(
-                                builder: (BuildContext context) {
-                                  return NavigationBarPage(selectedIndex: 1);
-                                },
-                              ));
+                if (authNotifier.user == null) {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (BuildContext context) {
+                      return LoginPage();
+                    }),
+                  );
+                } else if (authNotifier.userDetails == null) {
+                  // Handle the case when userDetails is null
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (BuildContext context) {
+                      return LoginPage();
+                    }),
+                  );
+                } else if (authNotifier.userDetails.role == 'admin') {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (BuildContext context) {
+                      return AdminHomePage();
+                    }),
+                  );
+                } else {
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (BuildContext context) {
+                      return NavigationBarPage(selectedIndex: 1);
+                    }),
+                  );
+                }
               },
               child: Container(
                 padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
